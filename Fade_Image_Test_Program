@@ -1,0 +1,67 @@
+import sys
+import time
+import pygame
+
+FADE_IN_TIME = 7
+FADE_OUT_TIME = 7
+FADE_IN_EASING = lambda x: x
+FADE_OUT_EASING = lambda x: x
+
+pygame.init()
+clock = pygame.time.Clock()
+size = width, height = 1280, 750
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+
+pygame.mixer.music.load(r'C:CAMINHO DO ARQUIVO\SONGNAME.mp3')
+pygame.mixer.music.play()
+
+img_1 = pygame.image.load(r'C:CAMINHO_DO_ARQUIVO\IMAGE_NAME.jpg')
+img_2 = pygame.image.load(r'C:CAMINHO_DO_ARQUIVO\IMAGE_NAME.jpg') 
+text_rect = img_1.get_rect(center=(width / 2, height / 2))
+
+ST_FADEIN = 0
+ST_FADEOUT = 1
+
+state = ST_FADEIN
+last_state_change = time.time()
+
+while 1:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    state_time = time.time() - last_state_change
+
+    if state == ST_FADEIN:
+        if state_time >= FADE_OUT_TIME:
+            state = ST_FADEOUT
+            state_time -= FADE_IN_TIME
+            last_state_change = time.time() - state_time
+    elif state == ST_FADEOUT:
+        if  state_time >= FADE_OUT_TIME:
+            state = ST_FADEIN
+            state_time -= FADE_OUT_TIME 
+            last_state_change = time.time() - state_time
+
+    else:
+        raise ValueError()
+
+    if state == ST_FADEIN:
+        alpha = FADE_IN_EASING(1.0 * state_time / FADE_IN_TIME)
+        rt = img_1
+    elif  state == ST_FADEOUT:
+        alpha = 1. - FADE_OUT_EASING(1.0 * state_time / FADE_IN_TIME)
+        rt = img_2
+    else:
+        raise ValueError()
+
+    surf2 = pygame.surface.Surface((text_rect.width, text_rect.height))
+    surf2.set_alpha(255 * alpha)
+
+    screen.fill((0, 0, 0))
+    surf2.blit(rt,(0, 0))
+    screen.blit(surf2, text_rect)
+
+    pygame.display.flip()
+    clock.tick(50)
