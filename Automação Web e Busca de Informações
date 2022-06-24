@@ -1,0 +1,68 @@
+#instalando o selenium
+#!pip install selenium
+#Importando o webdriver pelo selenium
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+#criando a variável 'navegador' e armazenando nela o webdrive do chrome para acessarmos o navegador de forma automática
+navegador = webdriver.Chrome()
+
+#acessando o site do google
+navegador.get("https://www.google.com.br/")
+
+#escrevendo na barra de endereço do google - 'cotação dolar'
+navegador.find_element_by_xpath('/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys('cotação dolar')
+#pressionando enter na barra de endereço depois de escrever
+navegador.find_element_by_xpath('/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
+#pegando o valor da cotação do dolar
+cotacao_dolar = navegador.find_element_by_xpath('/html/body/div[7]/div/div[9]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div/div/div[1]/div/div[1]/div[1]/div[2]/span[1]').get_attribute("data-value")
+
+#print(cotacao_dolar)
+
+#Pegando a cotação do euro
+navegador.get("https://www.google.com.br/")
+navegador.find_element_by_xpath('/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys('cotação euro')
+navegador.find_element_by_xpath('/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
+cotacao_euro = navegador.find_element_by_xpath('/html/body/div[7]/div/div[9]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div/div/div[1]/div/div[1]/div[1]/div[2]/span[1]').get_attribute("data-value")
+
+#print(cotacao_dolar)
+#print(cotacao_euro)
+
+#Pegando a cotação do ouro
+navegador.get("https://www.melhorcambio.com/ouro-hoje")
+cotacao_ouro = navegador.find_element_by_xpath('/html/body/div[6]/div[1]/div/div/input[2]').get_attribute('value')
+cotacao_ouro = cotacao_ouro.replace(",",".")
+
+print(cotacao_dolar)
+print(cotacao_euro)
+print(cotacao_ouro)
+
+navegador.quit()
+
+
+import pandas as pd
+
+tabela = pd.read_excel('Produtos.xlsx')
+display(tabela)
+
+#Recalcular o preço de cada produto
+#atualizar a cotação nas linhas onde na coluna "Moeda" = Dólar
+#atualizar a cotação nas linhas onde na coluna "Moeda" = Euro
+#atualizar a cotação nas linhas onde na coluna "Moeda" = Ouro
+tabela.loc[tabela["Moeda"] == "Dólar", "Cotação"] = float(cotacao_dolar)
+tabela.loc[tabela["Moeda"] == "Euro", "Cotação"] = float(cotacao_euro)
+tabela.loc[tabela["Moeda"] == "Ouro", "Cotação"] = float(cotacao_ouro)
+
+# atualizar o preço base reais (preço base original * cotação)
+tabela['Preço Base Reais'] = tabela['Preço Base Original'] * tabela['Cotação']
+
+# atualizar o preço final (preço base reais * Margem)
+tabela['Preço Final'] = tabela['Preço Base Reais'] * tabela['Margem']
+
+display(tabela)
+
+#Pegando a tabela 'tabela' e transformando em um novo arquivo excel.
+tabela.to_excel('Produtos Novos.xlsx', index=False)
+
+tabelanova = pd.read_excel('Produtos Novos.xlsx')
+display(tabelanova)
