@@ -1,0 +1,11 @@
+print("Crie seu Vírus")
+print("__________________________")
+print()
+x = input("Digite o Nome do Vírus: ")
+
+def main():
+    q = 0
+    while 1:
+        q = q + 1
+        print("Vírus: ", x, "Cópias: ", q)
+main()
